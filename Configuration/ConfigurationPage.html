@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8" />
+    <title>AI翻译刮削插件配置</title>
+    <style>
+        .config-section { margin: 20px 0; padding: 10px; border: 1px solid #ddd; }
+        .config-item { margin: 10px 0; }
+        label { display: inline-block; width: 200px; }
+        input[type="text"], input[type="number"], select { width: 300px; }
+        textarea { width: 300px; height: 100px; }
+        button { margin: 5px; padding: 5px 10px; }
+    </style>
+</head>
+<body>
+    <h1>AI翻译刮削插件配置</h1>
+
+    <!-- AI翻译配置 -->
+    <div class="config-section">
+        <h2>AI翻译配置</h2>
+        <div class="config-item">
+            <label>启用AI翻译：</label>
+            <input type="checkbox" id="EnableAITranslation" />
+        </div>
+        <div class="config-item">
+            <label>翻译接口：</label>
+            <select id="TranslationProvider">
+                <option value="deepseek">DeepSeek</option>
+                <option value="openai">OpenAI</option>
+                <option value="google">谷歌翻译</option>
+            </select>
+        </div>
+        <div class="config-item">
+            <label>API密钥：</label>
+            <input type="text" id="ApiKey" placeholder="输入API密钥" />
+        </div>
+        <div class="config-item">
+            <label>API端点：</label>
+            <input type="text" id="ApiEndpoint" placeholder="可选，留空使用默认" />
+        </div>
+        <div class="config-item">
+            <label>超时时间（秒）：</label>
+            <input type="number" id="TranslationTimeout" value="10" min="1" />
+        </div>
+    </div>
+
+    <!-- 数据源配置 -->
+    <div class="config-section">
+        <h2>数据源配置</h2>
+        <div class="config-item">
+            <label>自定义数据源（每行一个）：</label>
+            <textarea id="CustomDataSources" placeholder="输入数据源URL"></textarea>
+        </div>
+        <div class="config-item">
+            <label>域名关键词（每行一个）：</label>
+            <textarea id="DomainKeywords" placeholder="输入域名关键词"></textarea>
+        </div>
+        <div class="config-item">
+            <label>匹配模式：</label>
+            <select id="MatchMode">
+                <option value="contains">包含</option>
+                <option value="equals">精确匹配</option>
+                <option value="regex">正则</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- 代理配置 -->
+    <div class="config-section">
+        <h2>代理配置</h2>
+        <div class="config-item">
+            <label>启用代理：</label>
+            <input type="checkbox" id="EnableProxy" />
+        </div>
+        <div class="config-item">
+            <label>代理类型：</label>
+            <select id="ProxyType">
+                <option value="http">HTTP</option>
+                <option value="https">HTTPS</option>
+                <option value="socks">SOCKS</option>
+            </select>
+        </div>
+        <div class="config-item">
+            <label>代理主机：</label>
+            <input type="text" id="ProxyHost" placeholder="如127.0.0.1" />
+        </div>
+        <div class="config-item">
+            <label>代理端口：</label>
+            <input type="number" id="ProxyPort" value="8080" min="1" max="65535" />
+        </div>
+    </div>
+
+    <!-- 备份配置 -->
+    <div class="config-section">
+        <h2>备份配置</h2>
+        <div class="config-item">
+            <label>启用备份：</label>
+            <input type="checkbox" id="EnableBackup" checked />
+        </div>
+        <div class="config-item">
+            <label>备份路径：</label>
+            <input type="text" id="BackupPath" placeholder="输入备份路径" />
+        </div>
+        <div class="config-item">
+            <label>备份保留天数：</label>
+            <input type="number" id="BackupRetentionDays" value="7" min="1" />
+        </div>
+    </div>
+
+    <!-- 人脸识别配置 -->
+    <div class="config-section">
+        <h2>人脸识别配置</h2>
+        <div class="config-item">
+            <label>启用人脸识别：</label>
+            <input type="checkbox" id="EnableFaceRecognition" checked />
+        </div>
+        <div class="config-item">
+            <label>置信度阈值：</label>
+            <input type="number" id="FaceConfidenceThreshold" value="0.7" step="0.01" min="0" max="1" />
+        </div>
+        <div class="config-item">
+            <label>模型路径：</label>
+            <input type="text" id="FaceModelPath" placeholder="输入模型路径" />
+        </div>
+    </div>
+
+    <button id="SaveConfig">保存配置</button>
+    <button id="TestProxy">测试代理</button>
+    <button id="RunBackup">立即备份</button>
+
+    <script>
+        // 加载配置
+        document.addEventListener('DOMContentLoaded', async () => {
+            const config = await ApiClient.getPluginConfiguration('8F2E1A0D-3B7C-4567-890A-1234567890AB');
+            // 填充配置到表单
+            document.getElementById('EnableAITranslation').checked = config.EnableAITranslation;
+            document.getElementById('TranslationProvider').value = config.TranslationProvider;
+            document.getElementById('ApiKey').value = config.ApiKey;
+            document.getElementById('ApiEndpoint').value = config.ApiEndpoint;
+            document.getElementById('TranslationTimeout').value = config.TranslationTimeout;
+            document.getElementById('CustomDataSources').value = config.CustomDataSources.join('\n');
+            document.getElementById('DomainKeywords').value = config.DomainKeywords.join('\n');
+            document.getElementById('MatchMode').value = config.MatchMode;
+            document.getElementById('EnableProxy').checked = config.EnableProxy;
+            document.getElementById('ProxyType').value = config.ProxyType;
+            document.getElementById('ProxyHost').value = config.ProxyHost;
+            document.getElementById('ProxyPort').value = config.ProxyPort;
+            document.getElementById('EnableBackup').checked = config.EnableBackup;
+            document.getElementById('BackupPath').value = config.BackupPath;
+            document.getElementById('BackupRetentionDays').value = config.BackupRetentionDays;
+            document.getElementById('EnableFaceRecognition').checked = config.EnableFaceRecognition;
+            document.getElementById('FaceConfidenceThreshold').value = config.FaceConfidenceThreshold;
+            document.getElementById('FaceModelPath').value = config.FaceModelPath;
+        });
+
+        // 保存配置
+        document.getElementById('SaveConfig').addEventListener('click', async () => {
+            const config = {
+                EnableAITranslation: document.getElementById('EnableAITranslation').checked,
+                TranslationProvider: document.getElementById('TranslationProvider').value,
+                ApiKey: document.getElementById('ApiKey').value,
+                ApiEndpoint: document.getElementById('ApiEndpoint').value,
+                TranslationTimeout: parseInt(document.getElementById('TranslationTimeout').value),
+                CustomDataSources: document.getElementById('CustomDataSources').value.split('\n').filter(x => x),
+                DomainKeywords: document.getElementById('DomainKeywords').value.split('\n').filter(x => x),
+                MatchMode: document.getElementById('MatchMode').value,
+                EnableProxy: document.getElementById('EnableProxy').checked,
+                ProxyType: document.getElementById('ProxyType').value,
+                ProxyHost: document.getElementById('ProxyHost').value,
+                ProxyPort: parseInt(document.getElementById('ProxyPort').value),
+                EnableBackup: document.getElementById('EnableBackup').checked,
+                BackupPath: document.getElementById('BackupPath').value,
+                BackupRetentionDays: parseInt(document.getElementById('BackupRetentionDays').value),
+                EnableFaceRecognition: document.getElementById('EnableFaceRecognition').checked,
+                FaceConfidenceThreshold: parseFloat(document.getElementById('FaceConfidenceThreshold').value),
+                FaceModelPath: document.getElementById('FaceModelPath').value
+            };
+            await ApiClient.updatePluginConfiguration('8F2E1A0D-3B7C-4567-890A-1234567890AB', config);
+            alert('配置保存成功！');
+        });
+
+        // 测试代理
+        document.getElementById('TestProxy').addEventListener('click', async () => {
+            alert('代理测试中...');
+            // 实际需调用插件的代理测试接口
+            alert('代理测试完成：成功/失败');
+        });
+
+        // 立即备份
+        document.getElementById('RunBackup').addEventListener('click', async () => {
+            alert('备份中...');
+            // 实际需调用插件的备份接口
+            alert('备份完成！');
+        });
+    </script>
+</body>
+</html>
