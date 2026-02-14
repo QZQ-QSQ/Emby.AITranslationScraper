@@ -33,8 +33,8 @@ jobs:
           # 【重要】替换以下链接为Emby 4.9.3的真实DLL下载地址
           # 你可以从自己的Emby服务器获取：Emby安装目录\system\MediaBrowser.Common.dll
           # 也可以临时用示例链接（仅演示，需替换）
-          Invoke-WebRequest -Uri "https://raw.githubusercontent.com/你的用户名/Emby-AITranslationScraper/main/libs/MediaBrowser.Common.dll" -OutFile "libs/MediaBrowser.Common.dll"
-          Invoke-WebRequest -Uri "https://raw.githubusercontent.com/你的用户名/Emby-AITranslationScraper/main/libs/MediaBrowser.Model.dll" -OutFile "libs/MediaBrowser.Model.dll"
+          Invoke-WebRequest -Uri "https://cdn.jsdelivr.net/gh/MediaBrowser/Emby.Releases@4.9.3.0/Windows/system/MediaBrowser.Common.dll" -OutFile "libs/MediaBrowser.Common.dll"
+          Invoke-WebRequest -Uri "https://cdn.jsdelivr.net/gh/MediaBrowser/Emby.Releases@4.9.3.0/Windows/system/MediaBrowser.Model.dll" -OutFile "libs/MediaBrowser.Model.dll"
         shell: pwsh
 
       # 步骤4：还原NuGet包（Newtonsoft.Json、RestSharp等）
