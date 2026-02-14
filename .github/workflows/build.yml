@@ -1,0 +1,66 @@
+name: Build Emby AI Translation Scraper Plugin
+
+# 触发条件：推送到main分支、创建PR到main分支时运行
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+# 定义构建任务
+jobs:
+  build:
+    # 使用Windows环境（Emby 4.9.3基于.NET Framework 4.8，Windows构建更兼容）
+    runs-on: windows-latest
+
+    steps:
+      # 步骤1：检出仓库源码到构建环境
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 步骤2：设置.NET环境（用于还原NuGet包和编译）
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x' # 兼容.NET Framework 4.8的构建
+
+      # 步骤3：创建libs目录并下载Emby依赖库（关键！）
+      - name: Download Emby Dependencies
+        run: |
+          # 创建libs目录（存放MediaBrowser.Common.dll和MediaBrowser.Model.dll）
+          New-Item -ItemType Directory -Path libs -Force
+          
+          # 【重要】替换以下链接为Emby 4.9.3的真实DLL下载地址
+          # 你可以从自己的Emby服务器获取：Emby安装目录\system\MediaBrowser.Common.dll
+          # 也可以临时用示例链接（仅演示，需替换）
+          Invoke-WebRequest -Uri "https://raw.githubusercontent.com/你的用户名/Emby-AITranslationScraper/main/libs/MediaBrowser.Common.dll" -OutFile "libs/MediaBrowser.Common.dll"
+          Invoke-WebRequest -Uri "https://raw.githubusercontent.com/你的用户名/Emby-AITranslationScraper/main/libs/MediaBrowser.Model.dll" -OutFile "libs/MediaBrowser.Model.dll"
+        shell: pwsh
+
+      # 步骤4：还原NuGet包（Newtonsoft.Json、RestSharp等）
+      - name: Restore NuGet Packages
+        run: nuget restore Emby.AITranslationScraper/Emby.AITranslationScraper.csproj
+
+      # 步骤5：编译插件（Release模式）
+      - name: Build Plugin
+        run: dotnet build Emby.AITranslationScraper/Emby.AITranslationScraper.csproj --configuration Release --no-restore
+
+      # 步骤6：打包插件为ZIP（Emby可直接安装的格式）
+      - name: Package Plugin
+        run: |
+          # 创建dist目录存放编译产物
+          New-Item -ItemType Directory -Path dist -Force
+          
+          # 复制编译后的所有文件到dist
+          Copy-Item -Path "Emby.AITranslationScraper/bin/Release/net48/*" -Destination "dist/" -Recurse
+          
+          # 打包为ZIP文件（命名格式：插件名_版本号.zip）
+          Compress-Archive -Path "dist/*" -DestinationPath "Emby-AITranslationScraper_1.0.0.zip"
+        shell: pwsh
+
+      # 步骤7：上传编译产物（方便下载）
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Emby-AITranslationScraper-Plugin # 产物名称（自定义）
+          path: Emby-AITranslationScraper_1.0.0.zip # 要上传的ZIP文件路径
